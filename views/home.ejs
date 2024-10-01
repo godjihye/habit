@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>습관 목록</title>
-    <link rel="stylesheet" href="mystyle.css" type="text/css" />
+    <link rel="stylesheet" href="/mystyle.css" type="text/css" />
 </head>
 <body>
     <div class="container">
@@ -24,7 +24,7 @@
                     <% habbits.forEach((item) => { %>
                     <tr>
                         <td><%=item.id%></td>
-                        <td><a href=""><%=item.name%></a></td>
+                        <td><a href="record/<%=item['id']%>"><%=item.name%></a></td>
                         <td><%=item.start_date%> <%=item.end_date%></td>
                         <td>23</td>
                         <td><a href="remove/<%=item['id']%>">삭제</a></td>

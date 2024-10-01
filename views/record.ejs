@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>습관기록</title>
+    <link rel="stylesheet" href="/mystyle.css" type="text/css" />
+</head>
+<body>
+    <div class="container">
+        <h1>습관 기록</h1>
+        <h2>아침 운동</h2>
+        <figure>
+            <table>
+                <thead>
+                    <tr>
+                        <th>아이디</th>
+                        <th>습관 기록 메모</th>
+                        <th>기록 생성일</th>
+                        <th>삭제</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <% records.forEach((item)=> { %>
+                    <tr>
+                        <td><%=item['id']%></td>
+                        <td><%=item['memo']%></td>
+                        <td><%=item['created_at']%></td>
+                        <td><a href="">삭제</a></td>
+                    </tr>
+                    <% }); %>
+                </tbody>
+            </table>
+        </figure>
+    </div>
+</body>
+</html>

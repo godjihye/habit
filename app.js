@@ -159,6 +159,28 @@ app.post("/create", (req, res) => {
   res.redirect("/");
 });
 
+app.get("/record/:id", (req, res) => {
+  const id = req.params.id;
+  console.log(id);
+  let sql = `
+    select id, memo, created_at from habbit_record where habbit_id = ${id} order by 1 desc
+  `;
+  console.log(sql);
+  db.all(sql, [], (err, rows) => {
+    if (err) {
+      console.log(err);
+      res.status(500).send("Internal Server Error");
+    } else {
+      res.render("record", { records: rows });
+    }
+  });
+});
+/*
+id integer primary key autoincrement,
+        memo text,
+        created_at varchar(100),
+        habbit_id integer,
+*/
 app.listen(PORT, () => {
   console.log(`${PORT}에서 습관 관리 서버 작동중`);
 });
