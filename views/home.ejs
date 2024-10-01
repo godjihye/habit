@@ -21,18 +21,20 @@
                     </tr>
                 </thead>
                 <tbody>
+                    <% habbits.forEach((item) => { %>
                     <tr>
-                        <td>1</td>
-                        <td><a href="">아침 독서</a></td>
-                        <td>2024-09-01 2025-10-01</td>
+                        <td><%=item.id%></td>
+                        <td><a href=""><%=item.name%></a></td>
+                        <td><%=item.start_date%> <%=item.end_date%></td>
                         <td>23</td>
-                        <td><a href="">삭제</a></td>
+                        <td><a href="remove/<%=item['id']%>">삭제</a></td>
                     </tr>
+                    <%}); %>
                 </tbody>
             </table>
 
         </figure>
-        <a class="button" href="">습관 추가</a>
+        <a class="button" href="/create">습관 추가</a>
     </div>
 </body>
 </html>

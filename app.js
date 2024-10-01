@@ -6,6 +6,7 @@ const dbname = path.join(__dirname, "habbit.db");
 const db = new sqlite3.Database(dbname);
 const cookieParser = require("cookie-parser");
 const expressSession = require("express-session");
+const { create } = require("domain");
 const app = express();
 const PORT = 3000;
 
@@ -55,7 +56,16 @@ app.use(
 
 app.get("/", (req, res) => {
   if (req.session.user) {
-    res.render("home");
+    let sql = `
+      select id, name, start_date, end_date, created_at, member_id from habbits order by 1 desc; 
+    `;
+    db.all(sql, [], (err, rows) => {
+      if (err) {
+        res.status(500).send("Internal Server Error");
+      } else {
+        res.render("home", { habbits: rows });
+      }
+    });
   } else {
     res.redirect("/login");
   }
@@ -114,6 +124,41 @@ app.post("/register", (req, res) => {
     }
   });
 });
+
+app.get("/remove/:id", (req, res) => {
+  const id = req.params.id;
+  let sql = `
+    delete from habbits where id = ${id}
+  `;
+  db.run(sql, (err) => {
+    if (err) {
+      console.log(`err발생 : ${err}`);
+    }
+  });
+  res.redirect("/");
+});
+
+app.get("/create", (req, res) => {
+  res.render("create");
+});
+app.post("/create", (req, res) => {
+  const { name, start_date, end_date } = req.body;
+  const data = req.session.user;
+  const member_id = data["id"];
+  const createdAt = moment().format("YYYY-MM-DD");
+  let sql = `
+    insert into habbits(name, start_date, end_date, created_at, member_id) values(
+      '${name}', '${start_date}', '${end_date}', '${createdAt}', '${member_id}'
+    )
+  `;
+  db.run(sql, (err) => {
+    if (err) {
+      console.log(`err: ${err}`);
+    }
+  });
+  res.redirect("/");
+});
+
 app.listen(PORT, () => {
   console.log(`${PORT}에서 습관 관리 서버 작동중`);
 });
