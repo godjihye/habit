@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>습관 목록</title>
+    <link rel="stylesheet" href="/mystyle.css" type="text/css" />
+  </head>
+  <body>
+    <div class="container">
+      <h1>습관목록</h1>
+      <figure>
+        <table>
+          <thead>
+            <tr>
+              <th>아이디</th>
+              <th>습관명</th>
+              <th>시작일-종료일</th>
+              <th>기록갯수</th>
+              <th>삭제</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% habbits.forEach((item) => { %>
+            <tr>
+              <td><%=item.id%></td>
+              <td>
+                <a href="record/<%=item['id']%>"><%=item.habbit_name%></a>
+              </td>
+              <td><%=item.start_date%> ~ <%=item.end_date%></td>
+              <td>23</td>
+              <td><a href="remove/<%=item['id']%>">삭제</a></td>
+            </tr>
+            <%}); %>
+          </tbody>
+        </table>
+      </figure>
+      <a class="button" href="/create">습관 추가</a>
+    </div>
+  </body>
+</html>
