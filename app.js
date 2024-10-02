@@ -6,7 +6,6 @@ const dbname = path.join(__dirname, "habit.db");
 const db = new sqlite3.Database(dbname);
 const cookieParser = require("cookie-parser");
 const expressSession = require("express-session");
-const { create } = require("domain");
 const app = express();
 const PORT = 3000;
 
@@ -67,10 +66,11 @@ app.get("/", (req, res) => {
     const userId = userData["id"];
     console.log(userId);
     let sql = `
-      SELECT h.id as id, h.habit_name as habit_name, h.start_date as start_date, h.end_date as end_date, COUNT(r.habit_id) AS record_count FROM habits h LEFT JOIN records r ON h.id = r.habit_id WHERE h.user_id = ${userId} GROUP BY h.id, h.habit_name,h.start_date, h.end_date ORDER BY h.id desc; 
+      SELECT h.id as id, h.habit_name as habit_name, h.start_date as start_date, h.end_date as end_date, COUNT(r.habit_id) AS record_count FROM habits h LEFT JOIN records r ON h.id = r.habit_id WHERE h.user_id = ${userId} GROUP BY h.id, h.habit_name,h.start_date, h.end_date ORDER BY h.id desc
     `;
-    console.log(sql);
-    db.all(sql, [], (err, rows) => {
+    let sql2 = `select id, habit_name, start_date, end_date, (select count(1) from records r where r.habit_id=h.id) count from habits h where user_id=${userId} ORDER BY h.id desc`;
+
+    db.all(sql2, [], (err, rows) => {
       if (err) {
         res.status(500).send("Internal Server Error");
       } else {
@@ -81,7 +81,16 @@ app.get("/", (req, res) => {
     res.redirect("/login");
   }
 });
-
+app.get("/logout", (req, res) => {
+  req.session.destroy((err) => {
+    if (err) {
+      console.log(err);
+      res.status(500).send("Failed to log out");
+    }
+    res.clearCookie("connect.sid");
+    res.redirect("/");
+  });
+});
 app.get("/login", (req, res) => {
   res.render("login");
 });
@@ -92,13 +101,13 @@ app.post("/login", (req, res) => {
   let sql = `
     select * from users where email = '${email}' and password = '${password}'
   `;
-  console.log(sql);
   db.all(sql, [], (err, row) => {
     if (err) {
       console.log(err);
       res.status(500).send(`Internal Server Error`);
     }
-    if (row) {
+    console.log(row.count);
+    if (row != undefined) {
       console.log(row);
       req.session.user = {
         id: row[0]["id"],
@@ -107,9 +116,8 @@ app.post("/login", (req, res) => {
       setTimeout(() => {
         console.log(`login success!`);
         res.redirect("/");
-      }, 2000);
+      }, 500);
     } else {
-      console.log(`${password} != ${data}`);
       res.redirect("/login");
     }
   });
@@ -163,8 +171,8 @@ app.post("/habit/add", (req, res) => {
   const createdAt = moment().format("YYYY-MM-DD");
 
   let sql = `
-    insert into habits(habit_name, start_date, end_date, createdAt, user_id) values(
-      '${habit_name}', '${start_date}', '${end_date}', '${createdAt}', ${userId}
+    insert into habits(habit_name, start_date, end_date, user_id) values(
+      '${habit_name}', '${start_date}', '${end_date}', ${userId}
     )
   `;
   console.log(sql);

@@ -9,6 +9,7 @@
   <body>
     <div class="container">
       <h1>습관목록</h1>
+      <a class="button" href="/logout">로그아웃</a>
       <figure>
         <table>
           <thead>
@@ -28,7 +29,7 @@
                 <a href="/habit/<%=item['id']%>/record"><%=item.habit_name%></a>
               </td>
               <td><%=item.start_date%> ~ <%=item.end_date%></td>
-              <td><%=item.record_count%></td>
+              <td><%=item.count%></td>
               <td><a href="remove/<%=item['id']%>">삭제</a></td>
             </tr>
             <%}); %>
