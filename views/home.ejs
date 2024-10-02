@@ -28,7 +28,7 @@
                 <a href="/habit/<%=item['id']%>/record"><%=item.habit_name%></a>
               </td>
               <td><%=item.start_date%> ~ <%=item.end_date%></td>
-              <td>23</td>
+              <td><%=item.record_count%></td>
               <td><a href="remove/<%=item['id']%>">삭제</a></td>
             </tr>
             <%}); %>

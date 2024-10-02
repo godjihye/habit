@@ -31,7 +31,11 @@
               <td><%= item['id'] %></td>
               <td><%= item['memo'] %></td>
               <td><%= item['createdAt'] %></td>
-              <td><a href="">삭제</a></td>
+              <td>
+                <a href="/habit/<%=habit%>/record/remove/<%=item['id']%>"
+                  >삭제</a
+                >
+              </td>
             </tr>
             <% }); %>
           </tbody>

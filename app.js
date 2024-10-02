@@ -16,7 +16,7 @@ const create_users_sql = `
     email varchar(255),
     name varchar(100) NOT NULL,
     password varchar(255),
-    createdAt datetime default now
+    createdAt datetime default CURRENT_TIMESTAMP
   )
 `;
 const create_habits_sql = `
@@ -25,7 +25,7 @@ const create_habits_sql = `
     habit_name varchar(255),
     start_date datetime,
     end_date datetime,
-    createdAt datetime,
+    createdAt datetime default CURRENT_TIMESTAMP,
     user_id integer NOT NULL,
     FOREIGN KEY(user_id) REFERENCES users(id)
   )
@@ -34,7 +34,7 @@ const create_records_sql = `
   create table if not exists records(
     id integer primary key autoincrement,
     memo varchar(255),
-    createdAt datetime default now,
+    createdAt datetime default CURRENT_TIMESTAMP,
     habit_id integer NOT NULL,
     FOREIGN KEY(habit_id) REFERENCES habits(id)
   )
@@ -67,7 +67,7 @@ app.get("/", (req, res) => {
     const userId = userData["id"];
     console.log(userId);
     let sql = `
-      select id, habit_name, start_date, end_date, createdAt, user_id from habits where user_id = ${userId} order by 1 desc; 
+      SELECT h.id as id, h.habit_name as habit_name, h.start_date as start_date, h.end_date as end_date, COUNT(r.habit_id) AS record_count FROM habits h LEFT JOIN records r ON h.id = r.habit_id WHERE h.user_id = ${userId} GROUP BY h.id, h.habit_name,h.start_date, h.end_date; 
     `;
     console.log(sql);
     db.all(sql, [], (err, rows) => {
@@ -124,11 +124,13 @@ app.get("/register", (req, res) => {
 
 app.post("/register", (req, res) => {
   const { name, email, pw } = req.body;
-  const check_dup_email_sql = `select count(1) as count from users from email = '${email}'`;
+  const check_dup_email_sql = `select count(1) as count from users where email = '${email}'`;
   db.get(check_dup_email_sql, (err, row) => {
+    console.log(row);
     if (err) {
       res.status(500).send("Internal Server Error");
     }
+    console.log(row.count);
     if (row.count > 0) {
       res.status(200).send("already Email..");
     } else {
@@ -199,13 +201,29 @@ app.get("/habit/:id/record", (req, res) => {
 });
 
 app.get("/habit/:id/record/add", (req, res) => {
+  res.render("createrecord");
+});
+app.post("/habit/:id/record/add", (req, res) => {
   const habitId = req.params.id;
+  const data = req.body;
+  const memo = data["memo"];
   let sql = `
-  insert into records(memo, habit_id) values('새로운 메모', ${habitId})
+  insert into records(memo, habit_id) values('${memo}', ${habitId})
   `;
   db.run(sql);
   res.redirect(`/habit/${habitId}/record`);
 });
+app.get("/habit/:id/record/remove/:rid", (req, res) => {
+  const id = req.params.id;
+  const rid = req.params.rid;
+  let sql = `
+    delete from records where id = ${rid}
+  `;
+  db.run(sql);
+  res.redirect(`/habit/${id}/record`);
+});
 app.listen(PORT, () => {
   console.log(`${PORT}에서 습관 관리 서버 작동중`);
+  console.log("http://localhost:3000/");
+  console.log("email: user01@abc.com\npw: qwer1234");
 });
