@@ -67,7 +67,7 @@ app.get("/", (req, res) => {
     const userId = userData["id"];
     console.log(userId);
     let sql = `
-      SELECT h.id as id, h.habit_name as habit_name, h.start_date as start_date, h.end_date as end_date, COUNT(r.habit_id) AS record_count FROM habits h LEFT JOIN records r ON h.id = r.habit_id WHERE h.user_id = ${userId} GROUP BY h.id, h.habit_name,h.start_date, h.end_date; 
+      SELECT h.id as id, h.habit_name as habit_name, h.start_date as start_date, h.end_date as end_date, COUNT(r.habit_id) AS record_count FROM habits h LEFT JOIN records r ON h.id = r.habit_id WHERE h.user_id = ${userId} GROUP BY h.id, h.habit_name,h.start_date, h.end_date ORDER BY h.id desc; 
     `;
     console.log(sql);
     db.all(sql, [], (err, rows) => {
@@ -90,30 +90,27 @@ app.post("/login", (req, res) => {
   const { email, password } = req.body;
   console.log(`email: ${email}, pw: ${password}`);
   let sql = `
-    select id, password from users where email = '${email}'
+    select * from users where email = '${email}' and password = '${password}'
   `;
   console.log(sql);
-  db.all(sql, [], (err, rows) => {
+  db.all(sql, [], (err, row) => {
     if (err) {
       console.log(err);
       res.status(500).send(`Internal Server Error`);
+    }
+    if (row) {
+      console.log(row);
+      req.session.user = {
+        id: row[0]["id"],
+        authorized: true,
+      };
+      setTimeout(() => {
+        console.log(`login success!`);
+        res.redirect("/");
+      }, 2000);
     } else {
-      console.log(rows[0]);
-      console.log(rows[0]["password"]);
-      let data = JSON.stringify(rows[0]["password"]);
-      if (password == data.replace(/\"/gi, "")) {
-        req.session.user = {
-          id: rows[0]["id"],
-          authorized: true,
-        };
-        setTimeout(() => {
-          console.log(`login success!`);
-          res.redirect("/");
-        }, 3000);
-      } else {
-        console.log(`${password} != ${data}`);
-        res.redirect("/login");
-      }
+      console.log(`${password} != ${data}`);
+      res.redirect("/login");
     }
   });
 });
