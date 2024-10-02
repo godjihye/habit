@@ -2,7 +2,7 @@ const express = require("express");
 const sqlite3 = require("sqlite3");
 const path = require("path");
 const moment = require("moment");
-const dbname = path.join(__dirname, "habbit.db");
+const dbname = path.join(__dirname, "habit.db");
 const db = new sqlite3.Database(dbname);
 const cookieParser = require("cookie-parser");
 const expressSession = require("express-session");
@@ -10,34 +10,40 @@ const { create } = require("domain");
 const app = express();
 const PORT = 3000;
 
-const create_sql = `
-    create table if not exists users(
-        id integer primary key,
-        email varchar(255),
-        name varchar(100) NOT NULL,
-        password varchar(255),
-        createdAt datetime default now
-    );
-    create table if not exists habbits(
-        id integer primary key autoincrement,
-        habbit_name varchar(255),
-        start_date datetime,
-        end_date datetime,
-        createdAt datetime,
-        user_id integer NOT NULL,
-        FOREIGN KEY(user_id) REFERENCES users(id)
-    );
-    create table if not exists records(
-        id integer primary key autoincrement,
-        memo varchar(255),
-        createdAt datetime default now,
-        habbit_id integer NOT NULL,
-        FOREIGN KEY(habbit_id) REFERENCES habbits(id)
-    );
+const create_users_sql = `
+  create table if not exists users(
+    id integer primary key,
+    email varchar(255),
+    name varchar(100) NOT NULL,
+    password varchar(255),
+    createdAt datetime default now
+  )
+`;
+const create_habits_sql = `
+  create table if not exists habits(
+    id integer primary key autoincrement,
+    habit_name varchar(255),
+    start_date datetime,
+    end_date datetime,
+    createdAt datetime,
+    user_id integer NOT NULL,
+    FOREIGN KEY(user_id) REFERENCES users(id)
+  )
+`;
+const create_records_sql = `
+  create table if not exists records(
+    id integer primary key autoincrement,
+    memo varchar(255),
+    createdAt datetime default now,
+    habit_id integer NOT NULL,
+    FOREIGN KEY(habit_id) REFERENCES habits(id)
+  )
 `;
 
 db.serialize(() => {
-  db.run(create_sql);
+  db.run(create_users_sql);
+  db.run(create_habits_sql);
+  db.run(create_records_sql);
 });
 
 app.use(cookieParser());
@@ -61,14 +67,14 @@ app.get("/", (req, res) => {
     const userId = userData["id"];
     console.log(userId);
     let sql = `
-      select id, habbit_name, start_date, end_date, createdAt, user_id from habbits where user_id = ${userId} order by 1 desc; 
+      select id, habit_name, start_date, end_date, createdAt, user_id from habits where user_id = ${userId} order by 1 desc; 
     `;
     console.log(sql);
     db.all(sql, [], (err, rows) => {
       if (err) {
         res.status(500).send("Internal Server Error");
       } else {
-        res.render("home", { habbits: rows });
+        res.render("home", { habits: rows });
       }
     });
   } else {
@@ -117,16 +123,19 @@ app.get("/register", (req, res) => {
 });
 
 app.post("/register", (req, res) => {
-  const { name, id, pw } = req.body;
-  const createdAt = moment().format("YYYY-MM-DD");
-  let sql = `
-        insert into users values('${id}', '${name}', '${pw}', '${createdAt}')
-    `;
-  db.run(sql, (err) => {
+  const { name, email, pw } = req.body;
+  const check_dup_email_sql = `select count(1) as count from users from email = '${email}'`;
+  db.get(check_dup_email_sql, (err, row) => {
     if (err) {
       res.status(500).send("Internal Server Error");
+    }
+    if (row.count > 0) {
+      res.status(200).send("already Email..");
     } else {
-      console.log(`${id} ${pw}로 회원가입 완료`);
+      let insert_user_sql = `
+        insert into users(email, name, password) values('${email}','${name}' ,'${pw}')
+    `;
+      db.run(insert_user_sql);
       res.redirect("/login");
     }
   });
@@ -135,7 +144,7 @@ app.post("/register", (req, res) => {
 app.get("/remove/:id", (req, res) => {
   const id = req.params.id;
   let sql = `
-    delete from habbits where id = ${id}
+    delete from habits where id = ${id}
   `;
   db.run(sql, (err) => {
     if (err) {
@@ -145,18 +154,18 @@ app.get("/remove/:id", (req, res) => {
   res.redirect("/");
 });
 
-app.get("/create", (req, res) => {
-  res.render("create");
+app.get("/habit/add", (req, res) => {
+  res.render("createhabit");
 });
-app.post("/create", (req, res) => {
-  const { habbit_name, start_date, end_date } = req.body;
+app.post("/habit/add", (req, res) => {
+  const { habit_name, start_date, end_date } = req.body;
   const userData = req.session.user;
   const userId = userData["id"];
   const createdAt = moment().format("YYYY-MM-DD");
 
   let sql = `
-    insert into habbits(habbit_name, start_date, end_date, createdAt, user_id) values(
-      '${habbit_name}', '${start_date}', '${end_date}', '${createdAt}', ${userId}
+    insert into habits(habit_name, start_date, end_date, createdAt, user_id) values(
+      '${habit_name}', '${start_date}', '${end_date}', '${createdAt}', ${userId}
     )
   `;
   console.log(sql);
@@ -168,13 +177,13 @@ app.post("/create", (req, res) => {
   res.redirect("/");
 });
 
-app.get("/record/:id", (req, res) => {
-  const id = req.params.id;
-  console.log(id);
+app.get("/habit/:id/record", (req, res) => {
+  const habitId = req.params.id;
+  console.log(habitId);
   let sql = `
-    select r.id as id, r.memo as memo, r.created_at as created_at, h.habbit_name as habbit_name
-    from records r inner join habbits h
-    where r.habbit_id = h.id and r.habbit_id=${id} order by 1 desc
+    select r.id as id, r.memo as memo, r.createdAt as createdAt, h.habit_name as habit_name
+    from records r inner join habits h
+    where r.habit_id = h.id and r.habit_id=${habitId} order by 1 desc
   `;
 
   console.log(sql);
@@ -184,16 +193,19 @@ app.get("/record/:id", (req, res) => {
       res.status(500).send("Internal Server Error");
     } else {
       console.log(rows);
-      res.render("record", { records: rows });
+      res.render("record", { records: rows, habit: habitId });
     }
   });
 });
-/*
-id integer primary key autoincrement,
-        memo text,
-        created_at varchar(100),
-        habbit_id integer,
-*/
+
+app.get("/habit/:id/record/add", (req, res) => {
+  const habitId = req.params.id;
+  let sql = `
+  insert into records(memo, habit_id) values('새로운 메모', ${habitId})
+  `;
+  db.run(sql);
+  res.redirect(`/habit/${habitId}/record`);
+});
 app.listen(PORT, () => {
   console.log(`${PORT}에서 습관 관리 서버 작동중`);
 });

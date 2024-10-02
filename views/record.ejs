@@ -9,7 +9,12 @@
   <body>
     <div class="container">
       <h1>습관 기록</h1>
-      <h2><%=records[0]['habbit_name'] %></h2>
+
+      <h3>Habit ID: <%= habit %></h3>
+      <!-- habitId 출력 -->
+
+      <% if (records.length > 0) { %>
+      <h2><%= records[0]['habit_name'] %></h2>
       <figure>
         <table>
           <thead>
@@ -21,18 +26,23 @@
             </tr>
           </thead>
           <tbody>
-            <% records.forEach((item)=> { %>
+            <% records.forEach((item) => { %>
             <tr>
-              <td><%=item['id']%></td>
-              <td><%=item['memo']%></td>
-              <td><%=item['created_at']%></td>
+              <td><%= item['id'] %></td>
+              <td><%= item['memo'] %></td>
+              <td><%= item['createdAt'] %></td>
               <td><a href="">삭제</a></td>
             </tr>
             <% }); %>
           </tbody>
         </table>
       </figure>
-      <a href="/">목록으로 돌아가기</a>
+      <% } else { %>
+      <p>기록이 없습니다.</p>
+      <% } %>
+
+      <a class="button" href="/habit/<%=habit%>/record/add">습관 추가</a>
+      <a class="button" href="/">목록으로 돌아가기</a>
     </div>
   </body>
 </html>
