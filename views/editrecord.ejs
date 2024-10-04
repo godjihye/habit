@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>기록 수정</title>
+    <link rel="stylesheet" href="/style.css" type="text/css" />
+  </head>
+  <body>
+    <div class="container">
+      <h1>습관 기록 수정</h1>
+      <form action="" method="post">
+        <p>
+          <label>메모</label>
+          <input
+            type="text"
+            name="memo"
+            value="<%=record['memo']%>"
+            placeholder="메모"
+          />
+        </p>
+
+        <button type="submit">저장</button>
+      </form>
+    </div>
+  </body>
+</html>

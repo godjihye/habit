@@ -5,6 +5,27 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>로그인</title>
     <link rel="stylesheet" href="/style.css" type="text/css" />
+    <script>
+      document.addEventListener("DOMContentLoaded", function () {
+        document.querySelector("form").addEventListener("submit", validateForm);
+      });
+      function validateForm(event) {
+        event.preventDefault();
+        const email = document.querySelector('input[name="email"]').value;
+        const password = document.querySelector('input[name="password"]').value;
+        const emailPattern = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-z]{2,4}$/;
+        if (!emailPattern.test(email)) {
+          alert("올바른 이메일 형식을 입력하세요.");
+          return;
+        }
+        if (password.length < 6) {
+          alert("비밀번호는 최소 6자 이상이어야 합니다.");
+          return;
+        }
+        document.querySelector("form").submit();
+      }
+      document.querySelector("form").addEventListener("submit", validateForm);
+    </script>
   </head>
   <body>
     <div class="container small">

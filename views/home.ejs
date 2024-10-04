@@ -18,23 +18,41 @@
               <th>습관명</th>
               <th>시작일-종료일</th>
               <th>기록갯수</th>
+              <th>수정</th>
               <th>삭제</th>
             </tr>
           </thead>
           <tbody>
             <% habits.forEach((item) => { %>
             <tr>
-              <td><%=item.id%></td>
+              <td><%=item['rn']%></td>
               <td>
                 <a href="/habit/<%=item['id']%>/record"><%=item.habit_name%></a>
               </td>
               <td><%=item.start_date%> ~ <%=item.end_date%></td>
               <td><%=item.count%></td>
+              <td><a href="habit/edit/<%=item['id']%>">수정</a></td>
               <td><a href="remove/<%=item['id']%>">삭제</a></td>
             </tr>
             <%}); %>
           </tbody>
         </table>
+        <p></p>
+        <div class="pagination">
+          <% if(currentPage > 1) { %>
+          <a href="/?page=<%=currentPage-1%>" class="prev">< 이전</a>
+          <p>|</p>
+          <% } %> <% for (let i = 1; i<= totalPage; i++) { %>
+          <a
+            href="/?page=<%=i%>"
+            class="<%= currentPage === i ? 'active' : '' %>"
+            ><%=i%></a
+          >
+          <% } %> <% if(currentPage < totalPage) { %>
+          <p>|</p>
+          <a href="/?page=<%=currentPage+1%>" class="next">다음 ></a>
+          <% } %>
+        </div>
       </figure>
       <a class="button" href="/habit/add">습관 추가</a>
     </div>

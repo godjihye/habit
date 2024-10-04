@@ -10,11 +10,9 @@
     <div class="container">
       <h1>습관 기록</h1>
 
-      <h3>Habit ID: <%= habit %></h3>
+      <h3>Habit ID: <%=habit_id%></h3>
       <!-- habitId 출력 -->
 
-      <% if (records.length > 0) { %>
-      <h2><%= records[0]['habit_name'] %></h2>
       <figure>
         <table>
           <thead>
@@ -22,17 +20,23 @@
               <th>아이디</th>
               <th>습관 기록 메모</th>
               <th>기록 생성일</th>
+              <th>수정</th>
               <th>삭제</th>
             </tr>
           </thead>
           <tbody>
             <% records.forEach((item) => { %>
             <tr>
-              <td><%= item['id'] %></td>
+              <td><%= item['rn'] %></td>
               <td><%= item['memo'] %></td>
               <td><%= item['createdAt'] %></td>
               <td>
-                <a href="/habit/<%=habit%>/record/remove/<%=item['id']%>"
+                <a href="/habit/<%=habit_id%>/record/<%=item['id']%>/edit"
+                  >수정</a
+                >
+              </td>
+              <td>
+                <a href="/habit/<%=habit_id%>/record/<%=item['id']%>/remove"
                   >삭제</a
                 >
               </td>
@@ -41,11 +45,8 @@
           </tbody>
         </table>
       </figure>
-      <% } else { %>
-      <p>기록이 없습니다.</p>
-      <% } %>
 
-      <a class="button" href="/habit/<%=habit%>/record/add">습관 추가</a>
+      <a class="button" href="/habit/<%=habit_id%>/record/add">습관 추가</a>
       <a class="button" href="/">목록으로 돌아가기</a>
     </div>
   </body>

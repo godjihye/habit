@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>습관 수정</title>
+    <link rel="stylesheet" href="/style.css" type="text/css" />
+  </head>
+  <body>
+    <div class="container small">
+      <h1>습관 수정</h1>
+      <form action="" method="post">
+        <p>
+          <input
+            type="text"
+            name="habit_name"
+            value="<%=habit.habit_name%>"
+            placeholder="습관명"
+          />
+        </p>
+        <p>
+          <input
+            type="date"
+            name="start_date"
+            value="<%=habit.start_date%>"
+            placeholder="시작일"
+          />
+        </p>
+        <p>
+          <input
+            type="date"
+            name="end_date"
+            value="<%=habit.end_date%>"
+            placeholder="종료일"
+          />
+        </p>
+        <button type="submit">저장</button>
+      </form>
+    </div>
+  </body>
+</html>
